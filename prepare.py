@@ -58,26 +58,54 @@ def date_index(df):
     df.columns = df.columns.str.lower()
     df.columns = df.columns.str.replace('+', '_')
     
-    for col in df.columns:
+    if df.index.dtype == 'datetime64[ns]':
+        
+        df['month'] = df.index.month_name()
 
-        try:
-            # Attempt to convert each value to datetime
-            df[col] = pd.to_datetime(df[col])
+        df['day'] = df.index.day_name()
 
-            df = df.set_index(col).sort_index()
+        df['year'] = df.index.year
+        
+        return df   
+    # Attempt to convert the index to datetime
+    try:
+        
+        df.index = pd.to_datetime(df.index)
+        
+        df['month'] = df.index.month_name()
 
-            df['month'] = df.index.month_name()
+        df['day'] = df.index.day_name()
 
-            df['day'] = df.index.day_name()
-            
-            df['year'] = df.index.year
+        df['year'] = df.index.year
+        
+        return df
+    
+    except ValueError:
+        
+        # If the index cannot be converted to datetime, return False
+        return False
+    
+        
+        for col in df.columns:
 
-            # Check for consistent date format (adjust the format as needed)
-            return df
+            try:
+                # Attempt to convert each column to datetime
+                df[col] = pd.to_datetime(df[col])
 
-        except ValueError:
+                df = df.set_index(col).sort_index()
 
-            return False
+                df['month'] = df.index.month_name()
+
+                df['day'] = df.index.day_name()
+
+                df['year'] = df.index.year
+
+                # Check for consistent date format (adjust the format as needed)
+                return df
+
+            except ValueError:
+
+                return False
         
 def plt_dist(df, feats, loop = False):
     
